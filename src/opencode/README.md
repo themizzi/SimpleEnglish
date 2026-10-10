@@ -8,7 +8,7 @@ It uses the same prompt and Python linter as the Claude Code plugin.
 Clone the repository to a persistent location:
 
 ```bash
-git clone https://github.com/AminBlg/SimpleEnglish.git "$HOME/tools/SimpleEnglish"
+git clone https://github.com/themizzi/SimpleEnglish.git "$HOME/tools/SimpleEnglish"
 ```
 
 Add the entry point to `~/.config/opencode/opencode.json` for all projects, or to your project's `opencode.json`:
