@@ -93,6 +93,39 @@ def test_stop_flags_slop_reply_and_never_blocks():
     msg = json.loads(out)["systemMessage"]
     assert "opener" in msg and "closer" in msg and "slop" in msg, msg
 
+def test_opencode_skips_project_config_without_changing_claude_behavior():
+    with tempfile.TemporaryDirectory() as d:
+        path = write_slop(pathlib.Path(d, ".opencode", "skills"))
+        assert run(post(path))[0] == 2
+        assert run(post(path, harness="opencode"))[0] == 0
+
+def test_opencode_skips_default_and_custom_global_config():
+    with tempfile.TemporaryDirectory() as d:
+        default = write_slop(pathlib.Path(d, "opencode", "skills"))
+        custom = write_slop(pathlib.Path(d, "custom-config", "skills"))
+        env = {"XDG_CONFIG_HOME": d, "OPENCODE_CONFIG_DIR": str(pathlib.Path(d, "custom-config"))}
+        assert run(post(default, harness="opencode"), env=env)[0] == 0
+        assert run(post(custom, harness="opencode"), env=env)[0] == 0
+        assert run(post(write_slop(d), harness="opencode"), env=env)[0] == 2
+
+def test_opencode_config_exclusions_work_through_symlinks():
+    with tempfile.TemporaryDirectory() as d:
+        target = write_slop(pathlib.Path(d, ".opencode"))
+        link = pathlib.Path(d, "visible.md")
+        link.symlink_to(target)
+        assert run(post(str(link), harness="opencode"))[0] == 0
+        write_slop(pathlib.Path(d, "dotfiles"))
+        config = pathlib.Path(d, "config-link")
+        config.symlink_to(pathlib.Path(d, "dotfiles"))
+        assert run(post(str(config / "notes.md"), harness="opencode"),
+                   env={"OPENCODE_CONFIG_DIR": str(config)})[0] == 0
+
+def test_opencode_preserves_claude_and_user_exclusions():
+    with tempfile.TemporaryDirectory() as d:
+        assert run(post(write_slop(pathlib.Path(d, ".claude")), harness="opencode"))[0] == 0
+        path = write_slop(d)
+        assert run(post(path, harness="opencode"), env={"SIMPLE_ENGLISH_LINT_EXCLUDE": f"{d}/*.md"})[0] == 0
+
 def test_stop_does_not_count_sentences():
     """The reply register has no sentence cap since 2.1.0. Length alone is not a defect."""
     reply = " ".join(f"The step {i} runs." for i in range(20))

@@ -4,6 +4,10 @@ The Claude Code and Codex plugins include a `SessionStart` hook. The hook loads 
 
 The hook needs Node.js. Both plugins run `src/hooks/simple-english-activate.js` with the `node` command.
 
+The [OpenCode local plugin](../opencode/README.md) reuses this activation helper and the Python checks below.
+It appends the rules to model requests and returns file advice through tool results.
+Reply advice is logged and added to the next request in the same session.
+
 ## Install
 
 Claude Code:
@@ -51,6 +55,9 @@ Two more hooks run under Claude Code, both advisory. Neither one blocks.
 - `Stop`: the same script reads the last reply and adds a system message when the reply breaks the register: an em-dash, bold, a header, a list item, a filler opener or closer, or a slop word.
 
 Codex runs only the `SessionStart` hook. Test the checks with `python3 src/hooks/test_lint_hook.py`.
+
+OpenCode checks `write`, `edit`, and `apply_patch` results. Its file check also skips `.opencode` paths and OpenCode configuration directories.
+These extra exclusions apply only when the adapter sends `harness: "opencode"`. Claude Code's existing exclusions stay the same.
 
 ## What the file check skips
 

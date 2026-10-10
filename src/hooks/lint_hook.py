@@ -59,13 +59,20 @@ def variants(path):
     return {pathlib.Path(os.path.normpath(path)), path.resolve()}
 
 
-def excluded(target):
+def excluded(target, harness="claude"):
     """True for agent-internal Markdown and for the paths the user excludes."""
     config_dirs = variants(absolute(os.environ.get("CLAUDE_CONFIG_DIR") or f"~/{CLAUDE_DIR}"))
+    internal_dirs = {CLAUDE_DIR}
+    if harness == "opencode":
+        internal_dirs.add(".opencode")
+        default = pathlib.Path(os.environ.get("XDG_CONFIG_HOME") or "~/.config", "opencode")
+        config_dirs |= variants(absolute(default))
+        if os.environ.get("OPENCODE_CONFIG_DIR"):
+            config_dirs |= variants(absolute(os.environ["OPENCODE_CONFIG_DIR"]))
     raw = os.environ.get("SIMPLE_ENGLISH_LINT_EXCLUDE", "").split(os.pathsep)
     patterns = [os.path.expanduser(p) for p in raw if p]
     for form in variants(target):
-        if CLAUDE_DIR in form.parts or any(form.is_relative_to(d) for d in config_dirs):
+        if internal_dirs.intersection(form.parts) or any(form.is_relative_to(d) for d in config_dirs):
             return True
         if any(fnmatch.fnmatch(str(form), p) for p in patterns):
             return True
@@ -77,7 +84,7 @@ def post_tool_use(event):
     if not path.endswith(".md"):
         return 0
     target = absolute(path, event.get("cwd"))
-    if excluded(target):
+    if excluded(target, event.get("harness", "claude")):
         return 0
     lint = load_linter()
     if lint is None:

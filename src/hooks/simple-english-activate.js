@@ -60,11 +60,12 @@ function ruleBlock(content) {
   return second === -1 ? rest : rest.slice(0, second);
 }
 
-function buildContext(promptText) {
+function buildContext(promptText, skillPath) {
   if (!promptText) {
     return FALLBACK_CONTEXT;
   }
-  const out = HEADER + ruleBlock(stripFrontmatter(promptText)).trim();
+  const header = skillPath ? HEADER.replace('skills/simple-english/SKILL.md in this plugin', () => skillPath) : HEADER;
+  const out = header + ruleBlock(stripFrontmatter(promptText)).trim();
   if (out.length > MAX_CHARS) {
     process.stderr.write(`simple-english hook: payload is ${out.length} characters, over the ${MAX_CHARS} cap; sending the fallback ruleset\n`);
     return FALLBACK_CONTEXT;
