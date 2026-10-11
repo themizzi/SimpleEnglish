@@ -56,6 +56,7 @@ Both advisory checks are enabled by default. Use a plugin tuple to change their 
       {
         "fileChecks": true,
         "replyChecks": true,
+        "replyStyle": false,
         "pythonCommand": "python3"
       }
     ]
@@ -65,6 +66,7 @@ Both advisory checks are enabled by default. Use a plugin tuple to change their 
 
 - Set `fileChecks` to `false` to disable Markdown checks.
 - Set `replyChecks` to `false` to disable completed-reply checks.
+- Set `replyStyle` to `false` to omit the chat reply formatting rules. Document-writing rules and checks remain active. The default is `true`.
 - Set `pythonCommand` to an executable name or absolute path if Python has another name or location. Do not include shell arguments.
 
 Quit and restart OpenCode after changing these options.
@@ -138,7 +140,7 @@ V2 uses a separate adapter. Add it to `plugins` (plural), using the object-form 
 }
 ```
 
-For options, configure the adapter with an object:
+For options, configure the adapter with an object. Set `replyStyle` to `false` to omit the chat reply formatting rules; it defaults to `true`:
 
 ```json
 {

@@ -9,7 +9,7 @@ import plugin from './index.mjs';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SLOP = 'You should simply leverage the robust tool, making it seamless.\n';
 
-function fixture(t) {
+function fixture(t, options = {}) {
   const directory = mkdtempSync(path.join(os.tmpdir(), 'simple-english-v2-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const calls = { sessions: [], skills: [], tools: [], logs: [] };
@@ -20,7 +20,7 @@ function fixture(t) {
   let wake;
   const ctx = {
     location: { directory },
-    options: {},
+    options,
     app: { log: async ({ body }) => calls.logs.push(body) },
     session: {
       context: async ({ sessionID }) => {
@@ -69,6 +69,15 @@ test('exports a V2 plugin definition and registers the skill and request context
   const system = await h.context();
   assert.equal(system[0].type, 'text');
   assert.match(system[0].text, /SIMPLE ENGLISH SKILL ACTIVE AUTOMATICALLY/);
+  h.stop();
+});
+
+test('V2 replyStyle false omits only chat reply rules', async (t) => {
+  const h = fixture(t, { replyStyle: false });
+  await h.start();
+  const [context] = await h.context();
+  assert.doesNotMatch(context.text, /THE REPLY/);
+  assert.match(context.text, /THE DOCUMENT/);
   h.stop();
 });
 

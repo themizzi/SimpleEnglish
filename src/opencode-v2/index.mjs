@@ -18,6 +18,9 @@ export default {
     const context = activation.buildContext(
       activation.readFirstFile([path.join(ROOT, 'prompts', 'system-prompt.md')]),
       SKILL_FILE,
+      options.replyStyle === false
+        ? ''
+        : activation.readFirstFile([path.join(ROOT, 'prompts', 'reply-style.md')]),
     );
     const python = typeof options.pythonCommand === 'string' ? options.pythonCommand : 'python3';
     const sessions = new Map();

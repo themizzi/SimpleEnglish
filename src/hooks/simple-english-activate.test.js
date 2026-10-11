@@ -16,6 +16,7 @@ const {
 
 const SCRIPT = path.join(__dirname, 'simple-english-activate.js');
 const REPO_PROMPT = path.join(__dirname, '..', '..', 'prompts', 'system-prompt.md');
+const REPLY_PROMPT = path.join(__dirname, '..', '..', 'prompts', 'reply-style.md');
 
 function tmpRoot(promptText) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'se-hook-'));
@@ -83,7 +84,7 @@ test('can name the installed skill without changing the default header', () => {
 });
 
 test('the shipped prompt fits under the Claude Code stdout cap', () => {
-  const out = buildContext(fs.readFileSync(REPO_PROMPT, 'utf8'));
+  const out = buildContext(fs.readFileSync(REPO_PROMPT, 'utf8'), undefined, fs.readFileSync(REPLY_PROMPT, 'utf8'));
   assert.ok(out.length <= MAX_CHARS, `${out.length} > ${MAX_CHARS}`);
   assert.ok(out.includes('THE REPLY'));
   assert.ok(!out.includes('Standalone system prompt'), 'the page title leaked');

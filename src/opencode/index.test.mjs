@@ -64,6 +64,14 @@ test('loads checkout rules outside the checkout and preserves existing instructi
   assert.match((await h.system())[0], /SKILL ACTIVE AUTOMATICALLY/);
 });
 
+test('replyStyle false omits only chat reply rules', async (t) => {
+  const h = await harness(t, { replyStyle: false });
+  const [context] = await h.system('one');
+  assert.doesNotMatch(context, /THE REPLY/);
+  assert.match(context, /THE DOCUMENT/);
+  assert.ok(context.includes(path.join(ROOT, 'skills/simple-english/SKILL.md')));
+});
+
 test('registers the skill directory without replacing paths or URLs', async (t) => {
   const { hooks } = await harness(t);
   const config = { skills: { paths: ['/other/skills'], urls: ['https://example.com/skills/'] } };

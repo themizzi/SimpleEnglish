@@ -99,7 +99,10 @@ def rule_block(text):
 
 
 def sync():
-    prompt = rule_block((ROOT / "prompts" / "system-prompt.md").read_text(encoding="utf-8"))
+    prompt = "\n\n".join((
+        rule_block((ROOT / "prompts" / "system-prompt.md").read_text(encoding="utf-8")),
+        rule_block((ROOT / "prompts" / "reply-style.md").read_text(encoding="utf-8")),
+    ))
     style = (ROOT / "output-styles" / "simple-english.md").read_text(encoding="utf-8")
     style = re.sub(r"^---\n.*?\n---\n", "", style, count=1, flags=re.S).strip()
     if prompt != style:

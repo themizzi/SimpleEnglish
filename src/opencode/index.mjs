@@ -13,6 +13,9 @@ export default async function SimpleEnglish({ client, directory }, options = {})
   const context = activation.buildContext(
     activation.readFirstFile([path.join(ROOT, 'prompts', 'system-prompt.md')]),
     path.join(SKILLS, 'simple-english', 'SKILL.md'),
+    options.replyStyle === false
+      ? ''
+      : activation.readFirstFile([path.join(ROOT, 'prompts', 'reply-style.md')]),
   );
   const python = typeof options.pythonCommand === 'string' ? options.pythonCommand : 'python3';
   const sessions = new Map();
