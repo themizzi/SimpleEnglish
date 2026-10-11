@@ -2,6 +2,13 @@
 
 Each entry names the version, the date, and the measured effect where one exists.
 
+## Unreleased
+
+- Added: a local-checkout OpenCode plugin that loads the shared writing rules on model requests and registers the full skill.
+- Added: advisory Markdown checks after OpenCode writes, edits, and patches, with OpenCode-specific configuration exclusions.
+- Added: completed-reply checks that log advice and inject it into the next request in the same session.
+- No benchmark ran for this integration. The published figures describe the recorded runs.
+
 ## 2.1.1, 2026-09-30
 
 - Changed: removed wording in the skill that broke the skill's own rules. The

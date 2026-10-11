@@ -16,6 +16,7 @@ const {
 
 const SCRIPT = path.join(__dirname, 'simple-english-activate.js');
 const REPO_PROMPT = path.join(__dirname, '..', '..', 'prompts', 'system-prompt.md');
+const REPLY_PROMPT = path.join(__dirname, '..', '..', 'prompts', 'reply-style.md');
 
 function tmpRoot(promptText) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'se-hook-'));
@@ -75,8 +76,15 @@ test('uses the fallback ruleset when there is no prompt text', () => {
   assert.equal(buildContext(''), FALLBACK_CONTEXT);
 });
 
+test('can name the installed skill without changing the default header', () => {
+  assert.ok(buildContext('Rules', '/checkout/skills/simple-english/SKILL.md').includes('/checkout/skills/simple-english/SKILL.md'));
+  assert.ok(buildContext('Rules', '/checkout $&/skill.md').includes('/checkout $&/skill.md'));
+  assert.ok(buildContext('Rules').includes('skills/simple-english/SKILL.md in this plugin'));
+  assert.equal(buildContext('', '/checkout/skill.md'), FALLBACK_CONTEXT);
+});
+
 test('the shipped prompt fits under the Claude Code stdout cap', () => {
-  const out = buildContext(fs.readFileSync(REPO_PROMPT, 'utf8'));
+  const out = buildContext(fs.readFileSync(REPO_PROMPT, 'utf8'), undefined, fs.readFileSync(REPLY_PROMPT, 'utf8'));
   assert.ok(out.length <= MAX_CHARS, `${out.length} > ${MAX_CHARS}`);
   assert.ok(out.includes('THE REPLY'));
   assert.ok(!out.includes('Standalone system prompt'), 'the page title leaked');

@@ -31,6 +31,10 @@ function promptCandidates(pluginRoot, hookDirectory) {
   return candidates(pluginRoot, hookDirectory, ['prompts', 'system-prompt.md']);
 }
 
+function replyPromptCandidates(pluginRoot, hookDirectory) {
+  return candidates(pluginRoot, hookDirectory, ['prompts', 'reply-style.md']);
+}
+
 function readFirstFile(list) {
   for (const candidate of list) {
     try {
@@ -60,11 +64,17 @@ function ruleBlock(content) {
   return second === -1 ? rest : rest.slice(0, second);
 }
 
-function buildContext(promptText) {
+function buildContext(promptText, skillPath, additionalPromptText = '') {
   if (!promptText) {
     return FALLBACK_CONTEXT;
   }
-  const out = HEADER + ruleBlock(stripFrontmatter(promptText)).trim();
+  const header = skillPath ? HEADER.replace('skills/simple-english/SKILL.md in this plugin', () => skillPath) : HEADER;
+  const rules = [promptText, additionalPromptText]
+    .filter(Boolean)
+    .map((text) => ruleBlock(stripFrontmatter(text)).trim())
+    .filter(Boolean)
+    .join('\n\n');
+  const out = header + rules;
   if (out.length > MAX_CHARS) {
     process.stderr.write(`simple-english hook: payload is ${out.length} characters, over the ${MAX_CHARS} cap; sending the fallback ruleset\n`);
     return FALLBACK_CONTEXT;
@@ -74,7 +84,11 @@ function buildContext(promptText) {
 
 function main() {
   const pluginRoot = process.env.PLUGIN_ROOT || process.env.CLAUDE_PLUGIN_ROOT;
-  process.stdout.write(buildContext(readFirstFile(promptCandidates(pluginRoot, __dirname))));
+  process.stdout.write(buildContext(
+    readFirstFile(promptCandidates(pluginRoot, __dirname)),
+    undefined,
+    readFirstFile(replyPromptCandidates(pluginRoot, __dirname)),
+  ));
 }
 
 if (require.main === module) {
@@ -86,6 +100,7 @@ module.exports = {
   MAX_CHARS,
   buildContext,
   promptCandidates,
+  replyPromptCandidates,
   readFirstFile,
   ruleBlock,
   stripFrontmatter,
