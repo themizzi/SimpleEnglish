@@ -1,4 +1,4 @@
-# Simple English for OpenCode
+# Simple English for OpenCode V1
 
 This local plugin loads the writing rules automatically and runs advisory checks on Markdown files and completed replies.
 It uses the same prompt and Python linter as the Claude Code plugin.
@@ -11,7 +11,7 @@ Clone the repository to a persistent location:
 git clone https://github.com/themizzi/SimpleEnglish.git "$HOME/tools/SimpleEnglish"
 ```
 
-Add the entry point to `~/.config/opencode/opencode.json` for all projects, or to your project's `opencode.json`:
+For OpenCode V1, add the entry point to `~/.config/opencode/opencode.json` for all projects, or to your project's `opencode.json`:
 
 ```json
 {
@@ -125,17 +125,44 @@ git -C "$HOME/tools/SimpleEnglish" pull --ff-only
 
 Quit and restart OpenCode to load the update. If you move the checkout, update the configured plugin path before restarting.
 
+## OpenCode V2
+
+V2 uses a separate adapter. Add it to `plugins` (plural), using the object-form options when needed:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    "file:///Users/alex/tools/SimpleEnglish/src/opencode-v2/index.mjs"
+  ]
+}
+```
+
+For options, configure the adapter with an object:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [{
+    "package": "file:///Users/alex/tools/SimpleEnglish/src/opencode-v2/index.mjs",
+    "options": { "fileChecks": true, "replyChecks": true, "pythonCommand": "python3" }
+  }]
+}
+```
+
+The V2 adapter lives in `src/opencode-v2/`; keep it in the checkout because it loads the prompt, skill, and linter by relative paths. Both adapters share the helper functions but use their respective plugin APIs. The V2 config was checked with OpenCode 2.0.26; hook behavior is covered by unit tests, but a full model-backed runtime smoke test has not been completed.
+
 ## Compatibility and tests
 
-The adapter was tested on OpenCode 1.18.35 from a separate project with a local mock model provider.
+The V1 adapter was tested on OpenCode 1.18.35 from a separate project with a local mock model provider.
 The smoke test covered plugin loading, skill discovery, rule injection, Markdown advice, and next-request reply advice.
-The system-transform hook is experimental; later versions can change its interface.
-Plugin loading and skill discovery can be checked from the active project with `opencode debug config` and `opencode debug skill`.
+The V1 system-transform hook is experimental; later versions can change its interface. The V2 adapter uses V2 session and tool hooks.
+Configuration discovery can be checked with `opencode debug config`. The V1 adapter's prior skill-discovery smoke test used `opencode debug skill` on V1; that subcommand is not available in V2.
 
 Run the automated checks from the repository root:
 
 ```bash
-node --test src/hooks/simple-english-activate.test.js src/opencode/index.test.mjs
+node --test src/hooks/simple-english-activate.test.js src/opencode/index.test.mjs src/opencode-v2/index.test.mjs
 python3 src/hooks/test_lint_hook.py
 python3 evals/ste_lint.py --self-test
 python3 evals/check_numbers.py

@@ -34,8 +34,8 @@ export function markdownTargets(input, output, directory) {
 export function latestReply(messages) {
   if (!Array.isArray(messages)) return null;
   // Do not reach back past a new user turn or a failed/unfinished response.
-  const message = messages.findLast((item) => !item.info?.summary);
-  const info = message?.info;
+  const message = messages.findLast((item) => !(item.info || item).summary);
+  const info = message?.info || message;
   if (info?.role !== 'assistant' || !info.time?.completed || info.error || info.finish === 'tool-calls') return null;
   const text = (message.parts || [])
     .filter((part) => part.type === 'text' && !part.synthetic && !part.ignored)

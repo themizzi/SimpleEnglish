@@ -50,7 +50,7 @@ codex plugin add simple-english@simple-english
 
 Codex asks you to trust the hook before its first run. The hooks need Node.js. Details in [`src/hooks/README.md`](src/hooks/README.md).
 
-OpenCode plugin, from a local checkout, with automatic rules and advisory file and reply checks:
+OpenCode V1 plugin, from a local checkout, with automatic rules and advisory file and reply checks:
 
 ```json
 {
@@ -59,7 +59,16 @@ OpenCode plugin, from a local checkout, with automatic rules and advisory file a
 }
 ```
 
-Add this entry to your project or global OpenCode configuration, then quit and restart OpenCode.
+OpenCode V2 uses a separate adapter and the plural `plugins` field:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["file:///absolute/path/to/SimpleEnglish/src/opencode-v2/index.mjs"]
+}
+```
+
+Add the matching entry to your project or global OpenCode configuration, then quit and restart OpenCode.
 The advisory checks need Python 3.9 or later. Installation, options, and exclusions are in [`src/opencode/README.md`](src/opencode/README.md).
 
 No skill support? Paste the rule block of [`prompts/system-prompt.md`](prompts/system-prompt.md) into your system prompt, `AGENTS.md`, or `.cursorrules`. The page ends with a 60-token version for tight budgets.
